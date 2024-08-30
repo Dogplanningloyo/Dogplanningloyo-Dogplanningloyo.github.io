@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="DGN is a knowledge-driven, lightweight image instance navigation framework.">
+    <meta name="keywords" content="DGN, Embodied Ai">
+    <link rel="author" href="https://mahis.life" />
+    <title>Knowledge-Driven Visual Target Navigation: Dual Graph Navigation</title>
+    <meta property="og:url" content="https://letthink.github.io/">
+    <meta property="og:image" content="https://letthink.github.io/mfiles/preview.gif">
+    <meta property="og:description"
+        content="DGN is a knowledge-driven, lightweight image instance navigation framework.">
+    <meta property="og:title" content="Knowledge-Driven Visual Target Navigation: Dual Graph Navigation">
+    <meta property="og:site_name" content="Knowledge-Driven Visual Target Navigation: Dual Graph Navigation">
+    <meta property="og:see_also" content="https://letthink.github.io/">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://letthink.github.io/">
+    <meta name="twitter:title" content="Knowledge-Driven Visual Target Navigation: Dual Graph Navigation">
+    <meta name="twitter:description"
+        content="DGN is a knowledge-driven, lightweight image instance navigation framework.">
+    <meta name="twitter:image" content="https://letthink.github.io/mfiles/preview.gif">
+    <meta name="twitter:image:alt" content="Knowledge-Driven Visual Target Navigation: Dual Graph Navigation">
+    <meta name="twitter:site" content="@notmahi">
+    <meta name="twitter:player" content="https://letthink.github.io/mfiles/mosaic_extended.mp4">
+    <meta name="twitter:player:width" content="1280">
+    <meta name="twitter:player:height" content="720">
+    <meta name="twitter:player:stream" content="https://letthink.github.io/mfiles/mosaic_extended.mp4">
+    <meta name="twitter:player:stream:content_type" content="video/mp4">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet"> -->
+    <link rel="Shortcut Icon" href="./mfiles/images/DGN_robot_V1_1.png" type="/image/x-icon" />
+
+    <style>
+        body {
+            font-family: 'Open Sans',
+                sans-serif;
+        }
+
+        .hero-text {
+            font-size: 5rem;
+        }
+
+        .hero-icon {
+            height: 4rem;
+        }
+
+        .hero-subtitle {
+            font-size: 2rem;
+            font-style: italic;
+        }
+
+        .hero-subtext {
+            font-size: 1.5rem;
+        }
+
+        /* Media query for tablet and smaller, make hero text 23vw */
+        @media screen and (max-width: 767px) {
+            .hero-text {
+                font-size: 15vw;
+            }
+
+            .hero-icon {
+                height: 12vw;
+            }
+
+            .hero-subtitle {
+                font-size: 6vw;
+            }
+
+            .hero-subtext {
+                font-size: 4vw;
+            }
+
+            .has-text-success-dark.is-size-4 {
+                font-size: 4.5vw !important;
+            }
+        }
+
+        .nav-link {
+            font-size: 1.25rem;
+        }
+
+        #nav {
+            position: sticky;
+            top: 0;
+        }
+
+        .caption {
+            font-size: 1rem;
+            /* horizontal position overlaid on the previous class */
+            position: relative;
+            text-align: center;
+            left: 0rem;
+            background-color: rgba(22, 49, 68, 0.5);
+            border-radius: 0.25rem;
+        }
+
+        .authors a {
+            text-decoration: underline;
+        }
+
+        video.is-square-video {
+            aspect-ratio: 1 / 1;
+        }
+
+        video.is-loading {
+            background: rgba(0, 0, 0, 0.5) url(mfiles/images/puff.svg) center center no-repeat;
+        }
+
+        #selected_video {
+            aspect-ratio: 16 / 9;
+            max-height: 540px;
+        }
+
+        @media (orientation:landscape) {
+            .hide-on-landscape {
+                display: none;
+            }
+        }
+
+        @media (orientation:portrait) {
+            .hide-on-portrait {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation" id="nav">
+        <div class="navbar-brand">
+            <a class="navbar-item is-success nav-link is-size-3" href="#">
+                <!-- <span class="icon"><img src="mfiles/logo.svg"></img></span> -->
+                <span>DGN</span>
+            </a>
+
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navMenu">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div id="navMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item link is-info nav-link" href="#videos">
+                    <div class="icon-text">
+                        <span>Videos</span>
+                    </div>
+                </a>
+                <!-- <a class="navbar-item link is-info nav-link" href="#hardware">
+                    <div class="icon-text">
+                        <span>Hardware</span>
+                    </div>
+                </a> -->
+                <!-- <a class="navbar-item link is-info nav-link" href="#dataset">
+                    <div class="icon-text">
+                        <span>Dataset</span>
+                    </div>
+                </a> -->
+                <a class="navbar-item link is-info nav-link" href="#analysis">
+                    <div class="icon-text">
+                        <span>Analysis</span>
+                    </div>
+                </a>
+                <a class="navbar-item link is-info nav-link" href="#paper">
+                    <div class="icon-text">
+                        <span>Paper</span>
+                    </div>
+                </a>
+                <a class="navbar-item link is-info nav-link" href="#code">
+                    <div class="icon-text">
+                        <span>Code</span>
+                    </div>
+                </a>
+            </div>
+            <div class="navbar-end">
+                <a class="navbar-item link is-info nav-link" href="https://letthink.github.io/" target="_blank">
+                    <span>Contact us</span>
+                </a>
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a class="button is-info" href="https://letthink.github.io/" target="_blank">
+                            <span class="icon-text">
+                                <span class="icon">
+                                    <img src="mfiles/discord.svg" style="height: 1.5rem;"></img>
+                                </span>
+                                <span>Questions? Ask on Discord</span>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="hero is-fullheight-with-navbar">
+        <div class="hero-body block">
+            <div class="container">
+                <div class="container block">
+                    <div class="title block">
+                        <h1 class="hero-text">
+                            DGN
+                        </h1>
+                    </div>
+                    <div class="subtitle block">
+                        <h2 class="hero-subtitle">
+                            A knowledge-driven, lightweight image instance navigation framework
+                        </h2>
+                    </div>
+                    <div class="subtitle  is-size-7-mobile is-size-6-tablet block">
+                        <p class="authors">
+                            <a href="https://leo20021210.github.io/" target="_blank">Shiyao Li*</a>,
+                            <a href="https://github.com/LearnerSebM" target="_blank">Ziyang Meng*</a>,
+                            <a href="https://jdvakil.github.io/" target="_blank">b</a>,
+                            <a href="https://cpaxton.github.io/" target="_blank">c</a>,
+                            <a href="https://mahis.life" target="_blank">d<sup>†</sup></a>,
+                            <a href="https://lerrelpinto.com/" target="_blank">e<sup>†</sup></a>
+                        </p>
+                        <p class="authors">†: Equal advising</p>
+                    </div>
+                </div>
+                <div class="container block">
+                    <a class="button is-info is-outlined is-responsive" href="#videos">
+                        <span class="icon">
+                            <ion-icon name="videocam-outline"></ion-icon>
+                        </span>
+                        <span>DGN vedio</span>
+                    </a>
+                    <a class="button is-outlined is-responsive" href="#paper">
+                        <span class="icon">
+                            <ion-icon name="newspaper-outline"></ion-icon>
+                        </span>
+                        <span>Read the paper</span>
+                    </a>
+                    <a class="button is-outlined is-responsive" target="_blank" href="https://github.com/letthink/DGN">
+                        <span class="icon">
+                            <ion-icon name="logo-github"></ion-icon>
+                        </span>
+                        <span>GitHub repo</span>
+                    </a>
+                    <a class="button is-outlined is-responsive" target="_blank" href="https://letthink.github.io/">
+                        <span class="icon">
+                            <img src="mfiles/discord-black.svg" style="height: 1.5rem;"></img>
+                        </span>
+                        <span>Discord server</span>
+                    </a>
+                </div>
+                <div class="columns block">
+                    <div class="column">
+                        <figure>
+                            <video muted autoplay playsinline loop controls
+                                src="mfiles/epoch3_house_511EKB_exist_True.mp4"></video>
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <figure>
+                            <video muted autoplay playsinline loop controls src="mfiles/target_2_13.mp4"></video>
+                            <!-- <video muted autoplay playsinline loop controls src="mfiles/optimized.mp4"></video> -->
+                        </figure>
+                    </div>
+                </div>
+                <div class="container block columns">
+                    <div class="column">
+                        <div class="subtitle block is-size-4">
+                            <button class="button is-outlined is-responsive" id="expand-abstract">
+                                <span class="icon"><ion-icon name="caret-down-outline"
+                                        id="expand-abstract-icon"></ion-icon></span><span
+                                    id="expand-abstract-text">Expand
+                                    abstract</span></button>
+                        </div>
+                        <div class="is-size-6 block" id="abstract" hidden>
+                            <p>
+                                Visual target navigation is a critical task within the realm of embodied intelligence.
+                                The Existing end-to-end and modular approaches often encounter high computational
+                                demands, challenges in online updates, and limited generalization, which restrict their
+                                deployment on resource-constrained devices. To overcome these challenges, we introduce a
+                                knowledge-driven, lightweight image instance navigation framework, Dual Graph Navigation
+                                (DGN). The DGN constructs an External Knowledge Graph (EKG) using a limited dataset to
+                                capture prior correlation possibilities between objects, guiding the exploration
+                                process. During exploration, DGN builds an Internal Knowledge Graph (IKG) from an
+                                instance-aware module, recording explored regions and integrating with EKG to determine
+                                the next navigation target. The EKG is dynamically updated based on the outcomes of IKG
+                                exploration, continually enhancing the system's adaptability to the current environment.
+                                Additionally, DGN's plug-and-play modular design supports independent training and
+                                flexible replacement of target recognition, keypoint extraction, and path planning
+                                algorithms, reducing training and deployment costs while improving adaptability across
+                                diverse environments. We deploy DGN on three types of real-world robot platforms
+                                (including edge devices without CUDA support) and simulation environments (AI2THOR,
+                                Habitat), and our experimental results demonstrate that it operates stably, achieving
+                                state-of-the-art performance on the ProcTHOR-10K dataset.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Video section -->
+    <section class="hero is-fullheight-with-navbar" id="videos">
+        <div class="hero-body block">
+            <div class="container block">
+                <div class="container block">
+                    <div class="title block">
+                        <h1 class="hero-text">
+                            Videos
+                        </h1>
+                    </div>
+                    <div class="subtitle block">
+                        <h2 class="hero-subtitle">
+                            DGN in action
+                        </h2>
+                    </div>
+                    <div class="subtitle block">
+                        <p class="hero-subtext">
+                           DGN deplay in differnt embodiments and environments.
+                        </p>
+                    </div>
+                </div>
+                <div class="container block">
+                    
+
+                </div>
+                <div class="block">
+                    <div class="columns is-centered">
+                        <div class="column">
+                            <figure>
+                                <video muted autoplay playsinline loop controls
+                                    src="mfiles/DGN_short_V1.mp4"></video>
+                            </figure>
+                        </div>
+                        <!-- <div class="column is-12-mobile is-10-tablet video-holder">
+                            <figure class="">
+                                <style>
+                                    .embed-container {
+                                        position: relative;
+                                        padding-bottom: 56.25%;
+                                        height: 0;
+                                        overflow: hidden;
+                                        max-width: 100%;
+                                    }
+
+                                    .embed-container iframe,
+                                    .embed-container object,
+                                    .embed-container embed {
+                                        position: absolute;
+                                        top: 0;
+                                        left: 0;
+                                        width: 100%;
+                                        height: 100%;
+                                    }
+                                </style>
+                                <div class='embed-container'><iframe id="youtube-embed"
+                                        src=''
+                                        frameborder='0' showinfo='0' allowfullscreen></iframe></div>
+                            </figure> 
+                        </div>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="hero is-fullheight-with-navbar" id="analysis">
+        <div class="hero-body block">
+            <div class="container">
+                <div class="container block">
+                    <div class="title block">
+                        <h1 class="hero-text">
+                            Overview
+                        </h1>
+                    </div>
+                    <div class="subtitle block">
+                        <h2 class="hero-subtitle">
+                            Understanding the performance of DGN
+                        </h2>
+                    </div>
+                    <div class="block">
+                        <div class="subtitle">
+                            <figure class="block">
+                                <img src="mfiles/images/Figure_1.png"
+                                    alt="A sankey diagram showing the analysis of success and failure modes of DGN." />
+                            </figure>
+                            <!-- <iframe  data="mfiles/images/Figure_1.pdf" type="applications/pdf" width="100%" height="100%"> -->
+
+                            <!-- </iframe> -->
+
+                            <p class="block hero-subtext">
+                                Comparison between DGN and mainstream visual navigation methods. Mainstream visual
+                                navigation methods (Other methods)
+                                rely on RGBD input or driven by language, constructing semantic maps with tightly
+                                coupled perception modules, resulting
+                                in storage-consuming deployments. Our method (DGN) only utilizes RGBD input and
+                                constructs an Internal Knowledge Graph
+                                (IKG) using a plug-and-play instance-aware module, recording semantic information and
+                                topological relationships of
+                                instances while dynamically updating the External Knowledge Graph (EKG) with object
+                                category correlation. This enables
+                                efficient navigation that is deployable on low-power, low-computation edge devices.
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Paper -->
+    <section class="hero is-fullheight-with-navbar" id="paper">
+        <div class="hero-body block">
+            <div class="container">
+                <div class="container block">
+                    <div class="title block">
+                        <h1 class="hero-text">
+                            Paper
+                        </h1>
+                    </div>
+                    <div class="subtitle block">
+                        <h2 class="hero-subtitle">
+                            Knowledge-Driven Visual Target Navigation: Dual Graph Navigation
+                        </h2>
+                    </div>
+                    <div class="columns">
+                        <div class="column is-12-mobile">
+                            <a href="https://arxiv.org/abs/2401.12202" target="_blank">
+                                <figure class="image">
+                                    <img src="mfiles/images/Papaer_img_view.svg" style="max-width: 95vw;" alt="Paper">
+                                </figure>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <a class="button is-outlined is-medium is-fullwidth" target="_blank"
+                                href="https://letthink.github.io/">
+                                <span class="icon">
+                                    <img src="mfiles/images/arxiv.svg" style="height: 1.5rem;"></img>
+                                </span>
+                                <span>Read the paper (Arxiv)</span>
+                            </a>
+                        </div>
+                        <div class="column">
+                            <a class="button is-outlined is-medium is-fullwidth" target="_blank"
+                                href="mfiles/paper/submit_DGN_V3.pdf">
+                                <span class="icon">
+                                    <ion-icon name="document-text-outline"></ion-icon>
+                                </span>
+                                <span>Read the paper (PDF)</span>
+                            </a>
+                        </div>
+                        <div class="column">
+                            <a class="button is-outlined is-medium is-fullwidth" target="_blank" href="more/bibtex.txt">
+                                <span class="icon">
+                                    <ion-icon name="bookmark-outline"></ion-icon>
+                                </span>
+                                <span>Citation (bibtex)</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="content">
+                        <pre id="citation-text" style="max-width: 90vw; overflow-x: auto;">
+@article{li2024DGN,
+  title={Knowledge-Driven Visual Target Navigation: Dual Graph Navigation},
+  author={L,M,P,D,L,L},
+  journal={arXiv preprint arXiv:},
+  year={2024}
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Code -->
+    <section class="hero is-halfheight" id="code">
+        <div class="hero-body block">
+            <div class="container">
+                <div class="container block">
+                    <div class="title block">
+                        <h1 class="hero-text">
+                            Code
+                        </h1>
+                    </div>
+                    <div class="subtitle block">
+                        <h2 class="hero-subtitle">
+                            Get the code on github.
+                        </h2>
+                    </div>
+                    <div class="container block">
+                        <div class="columns">
+                            <div class="column">
+                                <a class="button is-outlined is-medium is-fullwidth" target="_blank"
+                                    href="https://github.com/letthink/DGN">
+                                    <span class="icon">
+                                        <ion-icon name="logo-github"></ion-icon>
+                                    </span>
+                                    <span>GitHub repo</span>
+                                </a>
+                            </div>
+                            <div class="column">
+                                <a class="button is-outlined is-medium is-fullwidth" target="_blank"
+                                    href="https://github.com/letthink/DGN">
+                                    <span class="icon">
+                                        <ion-icon name="book-outline"></ion-icon>
+                                    </span>
+                                    <span>Documentation</span>
+                                </a>
+                            </div>
+                            <div class="column">
+                                <a class="button is-outlined is-medium is-fullwidth" target="_blank"
+                                    href="https://letthink.github.io/">
+                                    <span class="icon">
+                                        <img src="mfiles/discord-black.svg" style="height: 1.5rem;"></img>
+                                    </span>
+                                    <span>Questions? Ask on Discord</span>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                <strong>DGN</strong> by <a href="https://letthink.github.io/">Shiyao Li</a>.
+                The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The
+                website content is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC ANS 4.0</a>.
+                The
+                website template is taken from <a href="https://ok-robot.github.io/">ok-robot</a>.
+            </p>
+        </div>
+    </footer>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</body>
+
+<script>
+    const videoData = [
+        {
+            "Environment": "Home 6",
+            "Picking Object": "Purple Medicine",
+            "Placing Object": "Chair",
+            "ST": 0,
+            "ET": 70
+        },
+        {
+            "Environment": "Home 6",
+            "Picking Object": "Eye glass Case",
+            "Placing Object": "Chair",
+            "ST": 73,
+            "ET": 149
+        },
+        {
+            "Environment": "Home 6",
+            "Picking Object": "Grey Rag",
+            "Placing Object": "Sink",
+            "ST": 152,
+            "ET": 226
+        },
+        {
+            "Environment": "Home 6",
+            "Picking Object": "Golden Can",
+            "Placing Object": "Table",
+            "ST": 229,
+            "ET": 306
+        },
+        {
+            "Environment": "Home 6",
+            "Picking Object": "Mouth Spray",
+            "Placing Object": "Countertop",
+            "ST": 310,
+            "ET": 390
+        },
+        {
+            "Environment": "Home 7",
+            "Picking Object": "Toy Bear",
+            "Placing Object": "Bed",
+            "ST": 0,
+            "ET": 79
+        },
+        {
+            "Environment": "Home 7",
+            "Picking Object": "Apple Juice",
+            "Placing Object": "Box",
+            "ST": 81,
+            "ET": 155
+        },
+        {
+            "Environment": "Home 7",
+            "Picking Object": "Paper Towel",
+            "Placing Object": "Blue Box",
+            "ST": 158,
+            "ET": 225
+        },
+        {
+            "Environment": "Home 7",
+            "Picking Object": "Herbal Tea",
+            "Placing Object": "Box",
+            "ST": 228,
+            "ET": 295
+        },
+        {
+            "Environment": "Home 7",
+            "Picking Object": "Earphone Box",
+            "Placing Object": "Blue Box",
+            "ST": 296,
+            "ET": 374
+        },
+        {
+            "Environment": "Home 8",
+            "Picking Object": "Taki Chips",
+            "Placing Object": "Countertop",
+            "ST": 2,
+            "ET": 74
+        },
+        {
+            "Environment": "Home 8",
+            "Picking Object": "Blue Gloves",
+            "Placing Object": "Sink",
+            "ST": 77,
+            "ET": 150
+        },
+        {
+            "Environment": "Home 8",
+            "Picking Object": "Bandage Box",
+            "Placing Object": "Dust Bin",
+            "ST": 152,
+            "ET": 214
+        },
+        {
+            "Environment": "Home 8",
+            "Picking Object": "White Aerosol",
+            "Placing Object": "Trash Can",
+            "ST": 224,
+            "ET": 288
+        },
+        {
+            "Environment": "Home 8",
+            "Picking Object": "Peanut Butter",
+            "Placing Object": "Countertop",
+            "ST": 290,
+            "ET": 364
+        },
+        {
+            "Environment": "Home 10",
+            "Picking Object": "Brown Box",
+            "Placing Object": "Chair",
+            "ST": 1,
+            "ET": 90
+        },
+        {
+            "Environment": "Home 10",
+            "Picking Object": "Cough Syrup",
+            "Placing Object": "Shelf",
+            "ST": 94,
+            "ET": 178
+        },
+        {
+            "Environment": "Home 10",
+            "Picking Object": "Axe Body Spray",
+            "Placing Object": "Shelf",
+            "ST": 182,
+            "ET": 273
+        },
+        {
+            "Environment": "Home 10",
+            "Picking Object": "Red Deodorant",
+            "Placing Object": "Bed",
+            "ST": 276,
+            "ET": 353
+        },
+        {
+            "Environment": "Home 10",
+            "Picking Object": "Green Tea Packet",
+            "Placing Object": "Basket",
+            "ST": 356,
+            "ET": 431
+        },
+        {
+            "Environment": "Home 2",
+            "Picking Object": "Detergent Pack",
+            "Placing Object": "Red Shopping Bag",
+            "ST": 0,
+            "ET": 79
+        },
+        {
+            "Environment": "Home 2",
+            "Picking Object": "Red Navaratna Oil",
+            "Placing Object": "Table",
+            "ST": 85,
+            "ET": 179
+        },
+        {
+            "Environment": "Home 2",
+            "Picking Object": "Blue Moisturizer",
+            "Placing Object": "Target Bag",
+            "ST": 183,
+            "ET": 275
+        },
+        {
+            "Environment": "Home 2",
+            "Picking Object": "Purple Shampoo",
+            "Placing Object": "White Rack",
+            "ST": 280,
+            "ET": 355
+        },
+        {
+            "Environment": "Home 2",
+            "Picking Object": "Orange Package",
+            "Placing Object": "Dust Bin",
+            "ST": 357,
+            "ET": 438
+        }
+    ];
+    // Create a mapping from env name to array of slices.
+    const taskRollouts = {};
+    videoData.forEach((video) => {
+        if (!(video.Environment in taskRollouts)) {
+            taskRollouts[video.Environment] = [];
+        }
+        taskRollouts[video.Environment].push(video);
+    });
+    // const YTVideoPrefix = "https://www.youtube.com/embed/";
+    const YTVideoSuffix = "?autoplay=1&fs=0&modestbranding=1&playsinline=1&rel=0&color=white";
+    const YTVideoID = {
+        "Home 2": "-A2vuqFizZQ",
+        "Home 6": "G7SBA5roNhI",
+        "Home 7": "tk0IJikYL2k",
+        "Home 8": "-zENt82QPEA",
+        "Home 10": "lQszLfsUWJk",
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // Get all "navbar-burger" elements
+        const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+        // Add a click event on each of them
+        $navbarBurgers.forEach(el => {
+            el.addEventListener('click', () => {
+
+                // Get the target from the "data-target" attribute
+                const target = el.dataset.target;
+                const $target = document.getElementById(target);
+
+                // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+                el.classList.toggle('is-active');
+                $target.classList.toggle('is-active');
+            });
+        });
+
+        const $navbarItems = Array.prototype.slice.call(document.querySelectorAll('.navbar-item'), 0);
+        $navbarItems.forEach(el => {
+            el.addEventListener('click', () => {
+                const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+                $navbarBurgers.forEach(el => {
+                    const target = el.dataset.target;
+                    const $target = document.getElementById(target);
+                    el.classList.remove('is-active');
+                    $target.classList.remove('is-active');
+                });
+            });
+        });
+
+
+        // Add listeners for the video selection.
+        const taskSelection = document.getElementById('video-task-selection');
+        const homeSelection = document.getElementById('video-home-selection');
+        const videoSelection = document.getElementById('youtube-embed');
+        // taskSelection.addEventListener("change", function (event) {
+        //     const task = event.target.value;
+        //     // const home = homeSelection.value;
+        //     const properHomeName = homeSelection.value;
+        //     // Calculate start, end from the value.
+        //     const [start, end] = task.split('-');
+        //     const videoSelection = document.getElementById('youtube-embed');
+        //     videoSelection.src = `${YTVideoPrefix}${YTVideoID[properHomeName]}${YTVideoSuffix}&start=${start}&end=${end}`;
+        // });
+
+        function updateTaskList(home) {
+            const videos = taskRollouts[home];
+            // Now change the options for task selection
+            const taskSelection = document.getElementById('video-task-selection');
+            taskSelection.innerHTML = '';
+
+            const option = document.createElement('option');
+            option.value = `0-${videos[4].ET}`;
+            option.innerText = `All`;
+            taskSelection.appendChild(option);
+            videos.forEach((video) => {
+                const option = document.createElement('option');
+                option.value = `${video.ST}-${video.ET}`;
+                option.innerText = `${video["Picking Object"]} to ${video["Placing Object"]}`;
+                taskSelection.appendChild(option);
+            });
+            return videos[0];
+        }
+        // homeSelection.addEventListener("change", function (event) {
+        //     const properHomeName = this.value;
+        //     video = updateTaskList(properHomeName);
+        //     const videoSelection = document.getElementById('youtube-embed');
+        //     videoSelection.src = `${YTVideoPrefix}${YTVideoID[properHomeName]}${YTVideoSuffix}`;
+        // });
+
+        // Add shuffle option
+        // function shuffleVideo() {
+        //     const randomHome = Object.keys(YTVideoID)[Math.floor(Math.random() * Object.keys(YTVideoID).length)];
+        //     const randomTask = taskRollouts[randomHome][Math.floor(Math.random() * taskRollouts[randomHome].length)];
+        //     const videoSelection = document.getElementById('youtube-embed');
+        //     homeSelection.value = randomTask.Environment;
+        //     updateTaskList(randomTask.Environment);
+        //     taskSelection.value = `${randomTask.ST}-${randomTask.ET}`;
+        //     videoSelection.src = `${YTVideoPrefix}${YTVideoID[randomHome]}${YTVideoSuffix}&start=${randomTask.ST}&end=${randomTask.ET}`;
+        // }
+        // shuffleVideo();
+        // const shuffleButton = document.getElementById('shuffle-button');
+        // shuffleButton.addEventListener('click', shuffleVideo);
+        // Toggle abstract when expand button is clicked
+        const expandButton = document.getElementById('expand-abstract');
+        const expandButtonText = document.getElementById('expand-abstract-text');
+        const expandButtonIcon = document.getElementById('expand-abstract-icon');
+        const abstract = document.getElementById('abstract');
+        expandButton.addEventListener('click', function (event) {
+            abstract.hidden = !abstract.hidden;
+            if (abstract.hidden) {
+                expandButtonText.innerText = 'Show abstract';
+                expandButtonIcon.name = "caret-down-outline";
+            } else {
+                expandButtonText.innerText = 'Hide abstract';
+                expandButtonIcon.name = "caret-forward-outline";
+            }
+        });
+    });
+
+    document.getElementById('citation-text').addEventListener('click', function () {
+        if (window.getSelection) {
+            var range = document.createRange();
+            range.selectNodeContents(this);
+            var selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    });
+
+</script>
+
+</html>

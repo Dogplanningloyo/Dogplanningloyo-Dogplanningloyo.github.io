@@ -1,0 +1,14 @@
+{
+  "name": "letthink.github.io",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "live-server ./ --port=8181 --host=localhost --proxy=/api:http://www.abc.com/api/"
+
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
